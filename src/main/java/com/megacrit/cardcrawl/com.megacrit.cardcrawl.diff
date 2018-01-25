@@ -1,0 +1,62 @@
+diff -ru src/main/java/com/megacrit/cardcrawl/map/MapRoomNode.java src/main/java/com/megacrit/cardcrawl/map/MapRoomNode.java
+--- src/main/java/com/megacrit/cardcrawl/map/MapRoomNode.java	2018-01-24 04:26:17.613612100 -0800
++++ src/main/java/com/megacrit/cardcrawl/map/MapRoomNode.java	2018-01-25 01:19:29.645239400 -0800
+@@ -31,6 +31,9 @@
+ import java.util.ArrayList;
+ import java.util.Iterator;
+ 
++// ColoredMap imports
++import com.megacrit.cardcrawl.rooms.*;
++
+ public class MapRoomNode {
+     private static final int IMG_WIDTH = (int)(Settings.scale * 64.0f);
+     private static final float OFFSET_X = 560.0f * Settings.scale;
+@@ -166,7 +169,7 @@
+                 } else {
+                     AbstractDungeon.getCurrMapNode().taken = true;
+                 }
+-                Iterator<MapEdge> connectedEdge = AbstractDungeon.getCurrMapNode().getEdgeConnectedTo(this);
++                MapEdge connectedEdge = AbstractDungeon.getCurrMapNode().getEdgeConnectedTo(this);
+                 if (connectedEdge != null) {
+                     connectedEdge.markAsTaken();
+                 }
+@@ -319,17 +322,31 @@
+         for (MapEdge edge : this.edges) {
+             edge.render(sb);
+         }
+-        if (this.highlighted) {
+-            sb.setColor(Color.LIGHT_GRAY);
++
++        // ColoredMap modification
++        if (room instanceof MonsterRoomElite) {
++            sb.setColor(new Color(0.1f, 0.0f, 0.0f, 0.75f));
+         } else {
+-            sb.setColor(OUTLINE_COLOR);
+-        }
++            sb.setColor(new Color(0.0f, 0.0f, 0.0f, 0.15f));
++        } 
++        
+         sb.draw(this.room.getMapImgOutline(), (float)this.x * SPACING_X + OFFSET_X - 64.0f + this.offsetX, (float)this.y * Settings.MAP_DST_Y + OFFSET_Y + DungeonMapScreen.offsetY - 64.0f + this.offsetY, 64.0f, 64.0f, 128.0f, 128.0f, this.scale * Settings.scale, this.scale * Settings.scale, 0.0f, 0, 0, 128, 128, false, false);
+-        if (this.taken) {
+-            sb.setColor(AVAILABLE_COLOR);
+-        } else {
+-            sb.setColor(this.color);
++        
++        // ColoredMap modification
++        if (room instanceof EventRoom) {
++            sb.setColor(new Color(0.0f, 0.0f, 0.0f, 1.0f));
++        } else if (room instanceof MonsterRoomElite) {
++            sb.setColor(new Color(0.8f, 0.0f, 0.0f, 1.0f));
++        } else if (room instanceof MonsterRoom) {
++            sb.setColor(new Color(0.5f, 0.0f, 0.0f, 1.0f));
++        }  else if (room instanceof RestRoom) {
++            sb.setColor(new Color(1.0f, 0.4f, 0.0f, 1.0f));
++        } else if (room instanceof ShopRoom) {
++            sb.setColor(new Color(0.8f, 0.675f, 0.0f, 1.0f));
++        } else if (room instanceof TreasureRoom) {
++            sb.setColor(new Color(0.8f, 0.675f, 0.0f, 1.0f));
+         }
++        
+         sb.draw(this.room.getMapImg(), (float)this.x * SPACING_X + OFFSET_X - 64.0f + this.offsetX, (float)this.y * Settings.MAP_DST_Y + OFFSET_Y + DungeonMapScreen.offsetY - 64.0f + this.offsetY, 64.0f, 64.0f, 128.0f, 128.0f, this.scale * Settings.scale, this.scale * Settings.scale, 0.0f, 0, 0, 128, 128, false, false);
+         if (this.taken || AbstractDungeon.firstRoomChosen && this.equals(AbstractDungeon.getCurrMapNode())) {
+             sb.setColor(AVAILABLE_COLOR);
