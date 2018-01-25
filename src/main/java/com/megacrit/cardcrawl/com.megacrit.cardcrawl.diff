@@ -1,6 +1,6 @@
 diff -ru src/main/java/com/megacrit/cardcrawl/map/MapRoomNode.java src/main/java/com/megacrit/cardcrawl/map/MapRoomNode.java
 --- src/main/java/com/megacrit/cardcrawl/map/MapRoomNode.java	2018-01-24 04:26:17.613612100 -0800
-+++ src/main/java/com/megacrit/cardcrawl/map/MapRoomNode.java	2018-01-25 01:19:29.645239400 -0800
++++ src/main/java/com/megacrit/cardcrawl/map/MapRoomNode.java	2018-01-25 12:56:05.216269400 -0800
 @@ -31,6 +31,9 @@
  import java.util.ArrayList;
  import java.util.Iterator;
@@ -29,11 +29,11 @@ diff -ru src/main/java/com/megacrit/cardcrawl/map/MapRoomNode.java src/main/java
 +
 +        // ColoredMap modification
 +        if (room instanceof MonsterRoomElite) {
-+            sb.setColor(new Color(0.1f, 0.0f, 0.0f, 0.75f));
++            sb.setColor(new Color(0.25f, 0.0f, 0.0f, 1.00f));
          } else {
 -            sb.setColor(OUTLINE_COLOR);
 -        }
-+            sb.setColor(new Color(0.0f, 0.0f, 0.0f, 0.15f));
++            sb.setColor(new Color(0.0f, 0.0f, 0.0f, 0.50f));
 +        } 
 +        
          sb.draw(this.room.getMapImgOutline(), (float)this.x * SPACING_X + OFFSET_X - 64.0f + this.offsetX, (float)this.y * Settings.MAP_DST_Y + OFFSET_Y + DungeonMapScreen.offsetY - 64.0f + this.offsetY, 64.0f, 64.0f, 128.0f, 128.0f, this.scale * Settings.scale, this.scale * Settings.scale, 0.0f, 0, 0, 128, 128, false, false);
@@ -46,9 +46,9 @@ diff -ru src/main/java/com/megacrit/cardcrawl/map/MapRoomNode.java src/main/java
 +        if (room instanceof EventRoom) {
 +            sb.setColor(new Color(0.0f, 0.0f, 0.0f, 1.0f));
 +        } else if (room instanceof MonsterRoomElite) {
-+            sb.setColor(new Color(0.8f, 0.0f, 0.0f, 1.0f));
++            sb.setColor(new Color(1.0f, 0.0f, 0.0f, 1.0f));
 +        } else if (room instanceof MonsterRoom) {
-+            sb.setColor(new Color(0.5f, 0.0f, 0.0f, 1.0f));
++            sb.setColor(new Color(0.75f, 0.1f, 0.0f, 1.0f));
 +        }  else if (room instanceof RestRoom) {
 +            sb.setColor(new Color(1.0f, 0.4f, 0.0f, 1.0f));
 +        } else if (room instanceof ShopRoom) {
