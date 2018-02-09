@@ -1,6 +1,6 @@
 diff -ru src/main/java/com/megacrit/cardcrawl/map/MapRoomNode.java src/main/java/com/megacrit/cardcrawl/map/MapRoomNode.java
---- src/main/java/com/megacrit/cardcrawl/map/MapRoomNode.java	2018-01-25 17:03:53.721900200 -0800
-+++ src/main/java/com/megacrit/cardcrawl/map/MapRoomNode.java	2018-01-26 01:22:38.844406800 -0800
+--- src/main/java/com/megacrit/cardcrawl/map/MapRoomNode.java	2018-02-08 20:13:24.017210200 -0800
++++ src/main/java/com/megacrit/cardcrawl/map/MapRoomNode.java	2018-02-08 20:25:19.351777300 -0800
 @@ -31,6 +31,9 @@
  import java.util.ArrayList;
  import java.util.Iterator;
@@ -20,7 +20,7 @@ diff -ru src/main/java/com/megacrit/cardcrawl/map/MapRoomNode.java src/main/java
                  if (connectedEdge != null) {
                      connectedEdge.markAsTaken();
                  }
-@@ -319,17 +322,15 @@
+@@ -321,17 +324,15 @@
          for (MapEdge edge : this.edges) {
              edge.render(sb);
          }

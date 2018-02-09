@@ -18,7 +18,7 @@ import com.megacrit.cardcrawl.rooms.*;
 public class ColoredMap implements PostInitializeSubscriber {
     private static final String MODNAME = "Colored Map";
     private static final String AUTHOR = "t-larson";
-    private static final String DESCRIPTION = "v1.1.0";
+    private static final String DESCRIPTION = "v1.2.0";
     
     public ColoredMap() {
         BaseMod.subscribeToPostInitialize(this);
