@@ -1,10 +1,6 @@
 package coloredmap;
 
-import basemod.BaseMod;
-import basemod.ModColorDisplay;
-import basemod.ModImage;
-import basemod.ModPanel;
-import basemod.ModSlider;
+import basemod.*;
 import basemod.interfaces.PostInitializeSubscriber;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -20,10 +16,12 @@ public class ColoredMap implements PostInitializeSubscriber {
     private static final String AUTHOR = "t-larson";
     private static final String DESCRIPTION = "v1.2.1";
     
+    @SuppressWarnings("unused")
     public ColoredMap() {
         BaseMod.subscribeToPostInitialize(this);
     }
     
+    @SuppressWarnings("unused")
     public static void initialize() {
         ColoredMap cm = new ColoredMap();
     }
