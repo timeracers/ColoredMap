@@ -142,17 +142,17 @@ public class ColoredMap implements PostInitializeSubscriber {
         Prefs modPrefs = SaveHelper.getPrefs("ColoredMapPrefs");
         float a = 0.0f;
         
-        if (room instanceof MonsterRoomElite) {
+        if (room.getMapSymbol() == "E") {
             a = modPrefs.getFloat("a_icon_1", 1.0f);
-        } else if (room instanceof MonsterRoom) {
+        } else if (room.getMapSymbol() == "M") {
             a = modPrefs.getFloat("a_icon_0", 1.0f);
-        } else if (room instanceof ShopRoom) {
+        } else if (room.getMapSymbol() == "$") {
             a = modPrefs.getFloat("a_icon_2", 1.0f);
-        } else if (room instanceof RestRoom) {
+        } else if (room.getMapSymbol() == "R") {
             a = modPrefs.getFloat("a_icon_3", 1.0f);
-        } else if (room instanceof TreasureRoom) {
+        } else if (room.getMapSymbol() == "T") {
             a = modPrefs.getFloat("a_icon_4", 1.0f);
-        } else if (room instanceof EventRoom) {
+        } else if (room.getMapSymbol() == "?") {
             a = modPrefs.getFloat("a_icon_5", 1.0f);
         } 
         
@@ -165,27 +165,27 @@ public class ColoredMap implements PostInitializeSubscriber {
         float g = 0.0f;
         float b = 0.0f;
         
-        if (room instanceof MonsterRoomElite) {
+        if (room.getMapSymbol() == "E") {
             r = modPrefs.getFloat("r_icon_1", 1.0f);
             g = modPrefs.getFloat("g_icon_1", 1.0f);
             b = modPrefs.getFloat("b_icon_1", 1.0f);
-        } else if (room instanceof MonsterRoom) {
+        } else if (room.getMapSymbol() == "M") {
             r = modPrefs.getFloat("r_icon_0", 1.0f);
             g = modPrefs.getFloat("g_icon_0", 1.0f);
             b = modPrefs.getFloat("b_icon_0", 1.0f);
-        } else if (room instanceof ShopRoom) {
+        } else if (room.getMapSymbol() == "$") {
             r = modPrefs.getFloat("r_icon_2", 1.0f);
             g = modPrefs.getFloat("g_icon_2", 1.0f);
             b = modPrefs.getFloat("b_icon_2", 1.0f);
-        } else if (room instanceof RestRoom) {
+        } else if (room.getMapSymbol() == "R") {
             r = modPrefs.getFloat("r_icon_3", 1.0f);
             g = modPrefs.getFloat("g_icon_3", 1.0f);
             b = modPrefs.getFloat("b_icon_3", 1.0f);
-        } else if (room instanceof TreasureRoom) {
+        } else if (room.getMapSymbol() == "T") {
             r = modPrefs.getFloat("r_icon_4", 1.0f);
             g = modPrefs.getFloat("g_icon_4", 1.0f);
             b = modPrefs.getFloat("b_icon_4", 1.0f);
-        } else if (room instanceof EventRoom) {
+        } else if (room.getMapSymbol() == "?") {
             r = modPrefs.getFloat("r_icon_5", 1.0f);
             g = modPrefs.getFloat("g_icon_5", 1.0f);
             b = modPrefs.getFloat("b_icon_5", 1.0f);
