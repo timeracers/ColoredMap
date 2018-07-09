@@ -8,12 +8,12 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" type="java-resource" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="1.8 (1)" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library">
       <library name="Maven: com.megacrit.cardcrawl:slaythespire:016">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../lib/desktop-1.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/desktop-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -22,7 +22,7 @@
     <orderEntry type="module-library">
       <library name="Maven: basemod:basemod:1.6.4">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../_ModTheSpire/mods/BaseMod.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/BaseMod.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

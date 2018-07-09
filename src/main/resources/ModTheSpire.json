@@ -1,0 +1,8 @@
+{
+  "modid": "coloredmap",
+  "name": "Colored Map",
+  "dependencies": ["basemod"],
+  "author_list": ["timeracers", "t-larson"],
+  "description": "Lets you configure the map icon colors",
+  "version": "0.1"
+}
