@@ -28,6 +28,14 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="Maven: com.evacipated.cardcrawl:ModTheSpire:2.2.1" level="project" />
+    <orderEntry type="module-library">
+      <library name="Maven: com.evacipated.cardcrawl:ModTheSpire:2.2.1">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/ModTheSpire.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>
