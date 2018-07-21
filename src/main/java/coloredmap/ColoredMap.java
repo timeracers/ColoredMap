@@ -6,17 +6,30 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.evacipated.cardcrawl.modthespire.Patcher;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
-import com.megacrit.cardcrawl.helpers.ImageMaster;
 import com.megacrit.cardcrawl.helpers.Prefs;
 import com.megacrit.cardcrawl.helpers.SaveHelper;
-import com.megacrit.cardcrawl.rooms.AbstractRoom;
+import com.megacrit.cardcrawl.rooms.*;
+import org.scannotation.AnnotationDB;
+
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @SpireInitializer
 public class ColoredMap implements PostInitializeSubscriber {
     private static final String MODNAME = "Colored Map";
     private static final String AUTHOR = "timeracers, t-larson";
     private static final String DESCRIPTION = "v1.3";
+    private static Prefs modPrefs;
+    private static boolean hasSelection = false;
+    private static ModColorDisplay selectedIcon;
+    private static String selectedMapSymbol;
+    private static List<Runnable> onSelectionChanged = new ArrayList<>();
 
     public ColoredMap() {
         BaseMod.subscribe(this);
@@ -28,183 +41,156 @@ public class ColoredMap implements PostInitializeSubscriber {
 
     @Override
     public void receivePostInitialize() {
-        Prefs modPrefs = SaveHelper.getPrefs("ColoredMapPrefs");
-        
-        ModPanel settingsPanel = new ModPanel();
-        settingsPanel.state.put("selection", -1);
+        modPrefs = SaveHelper.getPrefs("ColoredMapPrefs");
 
+        List<ModColorDisplay> icons = new ArrayList<>();
+        icons.add(createIcon(new MonsterRoom()));
+        icons.add(createIcon(new MonsterRoomElite()));
+        icons.add(createIcon(new RestRoom()));
+        icons.add(createIcon(new ShopRoom()));
+        icons.add(createIcon(new TreasureRoom()));
+        icons.add(createIcon(new EventRoom()));
+
+        System.out.println("Reflection Stuff Start");
+        try {
+            Field field = Patcher.class.getDeclaredField("annotationDBMap");
+            field.setAccessible(true);
+            Map<URL, AnnotationDB> annotationDBMap = (Map<URL, AnnotationDB>)field.get(null);
+            for (AnnotationDB db : annotationDBMap.values()) {
+                Set<String> roomNames = db.getAnnotationIndex().get(ColoredRoom.class.getName());
+                if (roomNames != null) {
+                    for (String roomName : roomNames) {
+                        try {
+                            AbstractRoom room = (AbstractRoom) Class.forName(roomName).getConstructor().newInstance();
+                            if(isValidColoredRoom(room))
+                                icons.add(createIcon(room));
+                        } catch (NoSuchMethodException innerEx) {
+                            System.out.println(roomName + " has not default constructor!");
+                        } catch (ClassCastException innerEx) {
+                            System.out.println(roomName + " does not extend AbstractRoom!");
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            System.out.println("Reflection Failed");
+            System.out.println(ex.getMessage());
+            System.out.println(ex.toString());
+        }
+        System.out.println("Reflection Stuff End");
+
+        ModPanel settingsPanel = new ModPanel();
         ModImage background = new ModImage(451.0f, 456.0f, "img/IconBackground.png");
         settingsPanel.addUIElement(background);
-        
-        ModColorDisplay[] icons = new ModColorDisplay[6];
-        ModSlider redSlider = new ModSlider("R", 350.0f, 700.0f, 255.0f, "", settingsPanel, (me) -> {
-            int selection = settingsPanel.state.get("selection");
-            if (selection != -1) {
-                icons[selection].r = me.value;
-                modPrefs.putFloat("r_icon_" + selection, me.value);
+        addSliders(settingsPanel);
+        Pagination pager = new Pagination(
+            new ImageButton("img/tinyRightArrow.png", 915, 550, 100, 100, (b) -> {}),
+            new ImageButton("img/tinyLeftArrow.png", 350, 550, 100, 100, (b) -> {}),
+            2,3, 175, 175, icons);
+        settingsPanel.addUIElement(pager);
+
+        Texture badgeTexture = new Texture(Gdx.files.internal("img/ColoredMapBadge.png"));
+        BaseMod.registerModBadge(badgeTexture, MODNAME, AUTHOR, DESCRIPTION, settingsPanel);
+    }
+
+    private static boolean isValidColoredRoom(AbstractRoom room){
+        boolean valid = true;
+        if(room.getMapSymbol() == null)
+        {
+            System.out.println(room.getClass().getName() + " has no map symbol!");
+            valid = false;
+        }
+        if(room.getMapImg() == null)
+        {
+            System.out.println(room.getClass().getName() + " has no map image!");
+            valid = false;
+        }
+        if(room.getMapImgOutline() == null)
+        {
+            System.out.println(room.getClass().getName() + " has no map outline!");
+            valid = false;
+        }
+        return valid;
+    }
+
+    private static ModColorDisplay createIcon(AbstractRoom room) {
+        String symbol = room.getMapSymbol();
+        ModColorDisplay icon = new ModColorDisplay(450.0f, 625.0f, room.getMapImg(), room.getMapImgOutline(),
+                (me) -> changeSelection(me, room.getMapSymbol()));
+        icon.r = modPrefs.getFloat(symbol + "_red_icon", 1.0f);
+        icon.g = modPrefs.getFloat(symbol + "_green_icon", 1.0f);
+        icon.b = modPrefs.getFloat(symbol + "_blue_icon", 1.0f);
+        icon.aOutline = modPrefs.getFloat(symbol + "_alpha_outline", 1.0f);
+        return icon;
+    }
+
+    private static void changeSelection(ModColorDisplay icon, String mapSymbol) {
+        hasSelection = true;
+        selectedIcon = icon;
+        selectedMapSymbol = mapSymbol;
+        for (Runnable action : onSelectionChanged)
+            action.run();
+    }
+
+    private static void addSliders(ModPanel settingsPanel){
+        ModSlider redSlider = new ModSlider("Red", 350.0f, 700.0f, 255.0f, "", settingsPanel, (me) -> {
+            if(hasSelection) {
+                selectedIcon.r = me.value;
+                modPrefs.putFloat(selectedMapSymbol + "_red_icon", me.value);
                 modPrefs.flush();
             }
         });
         settingsPanel.addUIElement(redSlider);
-        
-        ModSlider greenSlider = new ModSlider("G", 350.0f, 650.0f, 255.0f, "", settingsPanel, (me) -> {
-            int selection = settingsPanel.state.get("selection");
-            if (selection != -1) {
-                icons[selection].g = me.value;
-                modPrefs.putFloat("g_icon_" + selection, me.value);
-                modPrefs.flush();
-            }
-        });
-        settingsPanel.addUIElement(redSlider);
-        
-        ModSlider blueSlider = new ModSlider("B", 350.0f, 600.0f, 255.0f, "", settingsPanel, (me) -> {
-            int selection = settingsPanel.state.get("selection");
-            if (selection != -1) {
-                icons[selection].b = me.value;
-                modPrefs.putFloat("b_icon_" + selection, me.value);
+
+        ModSlider greenSlider = new ModSlider("Green", 350.0f, 650.0f, 255.0f, "", settingsPanel, (me) -> {
+            if(hasSelection) {
+                selectedIcon.g = me.value;
+                modPrefs.putFloat(selectedMapSymbol + "_green_icon", me.value);
                 modPrefs.flush();
             }
         });
         settingsPanel.addUIElement(greenSlider);
-        
-        ModSlider outlineSlider = new ModSlider("Outline", 350.0f, 550.0f, 100.0f, "%", settingsPanel, (me) -> {
-            int selection = settingsPanel.state.get("selection");
-            if (selection != -1) {
-                icons[selection].aOutline = me.value;
-                modPrefs.putFloat("a_icon_" + selection, me.value);
+
+        ModSlider blueSlider = new ModSlider("Blue", 350.0f, 600.0f, 255.0f, "", settingsPanel, (me) -> {
+            if(hasSelection) {
+                selectedIcon.b = me.value;
+                modPrefs.putFloat(selectedMapSymbol + "_blue_icon", me.value);
                 modPrefs.flush();
-            } 
+            }
         });
         settingsPanel.addUIElement(blueSlider);
-        
-        icons[0] = new ModColorDisplay(800.0f, 625.0f, ImageMaster.MAP_NODE_ENEMY, ImageMaster.MAP_NODE_ENEMY_OUTLINE, (me) -> {
-            settingsPanel.state.put("selection", 0);
-            redSlider.setValue(modPrefs.getFloat("r_icon_0", 1.0f));
-            greenSlider.setValue(modPrefs.getFloat("g_icon_0", 1.0f));
-            blueSlider.setValue(modPrefs.getFloat("b_icon_0", 1.0f));
-            outlineSlider.setValue(modPrefs.getFloat("a_icon_0", 1.0f));
+
+        ModSlider outlineSlider = new ModSlider("Outline", 350.0f, 550.0f, 100.0f, "%", settingsPanel, (me) -> {
+            if(hasSelection) {
+                selectedIcon.aOutline = me.value;
+                modPrefs.putFloat(selectedMapSymbol + "_alpha_outline", me.value);
+                modPrefs.flush();
+            }
         });
         settingsPanel.addUIElement(outlineSlider);
-        
-        icons[1] = new ModColorDisplay(625.0f, 625.0f, ImageMaster.MAP_NODE_ELITE, ImageMaster.MAP_NODE_ELITE_OUTLINE, (me) -> {
-            settingsPanel.state.put("selection", 1);
-            redSlider.setValue(modPrefs.getFloat("r_icon_1", 1.0f));
-            greenSlider.setValue(modPrefs.getFloat("g_icon_1", 1.0f));
-            blueSlider.setValue(modPrefs.getFloat("b_icon_1", 1.0f));
-            outlineSlider.setValue(modPrefs.getFloat("a_icon_1", 1.0f));
-        });
-        
-        icons[2] = new ModColorDisplay(450.0f, 625.0f, ImageMaster.MAP_NODE_MERCHANT, ImageMaster.MAP_NODE_MERCHANT_OUTLINE, (me) -> {
-            settingsPanel.state.put("selection", 2);
-            redSlider.setValue(modPrefs.getFloat("r_icon_2", 1.0f));
-            greenSlider.setValue(modPrefs.getFloat("g_icon_2", 1.0f));
-            blueSlider.setValue(modPrefs.getFloat("b_icon_2", 1.0f));
-            outlineSlider.setValue(modPrefs.getFloat("a_icon_2", 1.0f));
-        });
-        
-        icons[3] = new ModColorDisplay(800.0f, 450.0f, ImageMaster.MAP_NODE_REST, ImageMaster.MAP_NODE_REST_OUTLINE, (me) -> {
-            settingsPanel.state.put("selection", 3);
-            redSlider.setValue(modPrefs.getFloat("r_icon_3", 1.0f));
-            greenSlider.setValue(modPrefs.getFloat("g_icon_3", 1.0f));
-            blueSlider.setValue(modPrefs.getFloat("b_icon_3", 1.0f));
-            outlineSlider.setValue(modPrefs.getFloat("a_icon_3", 1.0f));
-        });
-        
-        icons[4] = new ModColorDisplay(625.0f, 450.0f, ImageMaster.MAP_NODE_TREASURE, ImageMaster.MAP_NODE_TREASURE_OUTLINE, (me) -> {
-            settingsPanel.state.put("selection", 4);
-            redSlider.setValue(modPrefs.getFloat("r_icon_4", 1.0f));
-            greenSlider.setValue(modPrefs.getFloat("g_icon_4", 1.0f));
-            blueSlider.setValue(modPrefs.getFloat("b_icon_4", 1.0f));
-            outlineSlider.setValue(modPrefs.getFloat("a_icon_4", 1.0f));
-        });
-        
-        icons[5] = new ModColorDisplay(450.0f, 450.0f, ImageMaster.MAP_NODE_EVENT, ImageMaster.MAP_NODE_EVENT_OUTLINE, (me) -> {
-            settingsPanel.state.put("selection", 5);
-            redSlider.setValue(modPrefs.getFloat("r_icon_5", 1.0f));
-            greenSlider.setValue(modPrefs.getFloat("g_icon_5", 1.0f));
-            blueSlider.setValue(modPrefs.getFloat("b_icon_5", 1.0f));
-            outlineSlider.setValue(modPrefs.getFloat("a_icon_5", 1.0f));
-        });
 
-        for (int i = 0; i < icons.length; i++) {
-            icons[i].r = modPrefs.getFloat("r_icon_" + i, 1.0f);
-            icons[i].g = modPrefs.getFloat("g_icon_" + i, 1.0f);
-            icons[i].b = modPrefs.getFloat("b_icon_" + i, 1.0f);
-            icons[i].aOutline = modPrefs.getFloat("a_icon_" + i, 1.0f);
-            settingsPanel.addUIElement(icons[i]);
-        }
-        
-        Texture badgeTexture = new Texture(Gdx.files.internal("img/ColoredMapBadge.png"));
-        BaseMod.registerModBadge(badgeTexture, MODNAME, AUTHOR, DESCRIPTION, settingsPanel);
+        onSelectionChanged.add(() -> {
+            redSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_red_icon", 1.0f));
+            greenSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_green_icon", 1.0f));
+            blueSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_blue_icon", 1.0f));
+            outlineSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_alpha_outline", 1.0f));
+        });
     }
-    
+
     public static void setIconOutlineColor(AbstractRoom room, SpriteBatch sb) {
-        Prefs modPrefs = SaveHelper.getPrefs("ColoredMapPrefs");
-        float a = 0.0f;
-
-        switch (room.getMapSymbol()) {
-            case "E":
-                a = modPrefs.getFloat("a_icon_1", 1.0f);
-                break;
-            case "M":
-                a = modPrefs.getFloat("a_icon_0", 1.0f);
-                break;
-            case "$":
-                a = modPrefs.getFloat("a_icon_2", 1.0f);
-                break;
-            case "R":
-                a = modPrefs.getFloat("a_icon_3", 1.0f);
-                break;
-            case "T":
-                a = modPrefs.getFloat("a_icon_4", 1.0f);
-                break;
-            case "?":
-                a = modPrefs.getFloat("a_icon_5", 1.0f);
-                break;
+        if(room.getMapSymbol() != null) {
+            sb.setColor(new Color(0.0f, 0.0f, 0.0f,
+                modPrefs.getFloat(room.getMapSymbol() + "_alpha_outline", 1.0f)));
         }
-        
-        sb.setColor(new Color(0.0f, 0.0f, 0.0f, a));
     }
-    
-    public static void setIconColor(AbstractRoom room, SpriteBatch sb) {
-        Prefs modPrefs = SaveHelper.getPrefs("ColoredMapPrefs");
-        float r = 0.0f;
-        float g = 0.0f;
-        float b = 0.0f;
 
-        switch (room.getMapSymbol()) {
-            case "E":
-                r = modPrefs.getFloat("r_icon_1", 1.0f);
-                g = modPrefs.getFloat("g_icon_1", 1.0f);
-                b = modPrefs.getFloat("b_icon_1", 1.0f);
-                break;
-            case "M":
-                r = modPrefs.getFloat("r_icon_0", 1.0f);
-                g = modPrefs.getFloat("g_icon_0", 1.0f);
-                b = modPrefs.getFloat("b_icon_0", 1.0f);
-                break;
-            case "$":
-                r = modPrefs.getFloat("r_icon_2", 1.0f);
-                g = modPrefs.getFloat("g_icon_2", 1.0f);
-                b = modPrefs.getFloat("b_icon_2", 1.0f);
-                break;
-            case "R":
-                r = modPrefs.getFloat("r_icon_3", 1.0f);
-                g = modPrefs.getFloat("g_icon_3", 1.0f);
-                b = modPrefs.getFloat("b_icon_3", 1.0f);
-                break;
-            case "T":
-                r = modPrefs.getFloat("r_icon_4", 1.0f);
-                g = modPrefs.getFloat("g_icon_4", 1.0f);
-                b = modPrefs.getFloat("b_icon_4", 1.0f);
-                break;
-            case "?":
-                r = modPrefs.getFloat("r_icon_5", 1.0f);
-                g = modPrefs.getFloat("g_icon_5", 1.0f);
-                b = modPrefs.getFloat("b_icon_5", 1.0f);
-                break;
+    public static void setIconColor(AbstractRoom room, SpriteBatch sb) {
+        if(room.getMapSymbol() != null) {
+            String symbol = room.getMapSymbol();
+            sb.setColor(new Color(
+                modPrefs.getFloat(symbol + "_red_icon", 1.0f),
+                modPrefs.getFloat(symbol + "_green_icon", 1.0f),
+                modPrefs.getFloat(symbol + "_blue_icon", 1.0f), 1.0f));
         }
-        
-        sb.setColor(new Color(r, g, b, 1.0f));
     }
 }
