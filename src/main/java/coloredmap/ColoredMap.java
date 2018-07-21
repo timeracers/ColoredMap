@@ -30,6 +30,9 @@ public class ColoredMap implements PostInitializeSubscriber {
     private static ModColorDisplay selectedIcon;
     private static String selectedMapSymbol;
     private static List<Runnable> onSelectionChanged = new ArrayList<>();
+    private static Field abstractRoomMapSymbolField;
+    private static Field abstractRoomMapImgField;
+    private static Field abstractRoomMapImgOutlineField;
 
     public ColoredMap() {
         BaseMod.subscribe(this);
@@ -43,6 +46,21 @@ public class ColoredMap implements PostInitializeSubscriber {
     public void receivePostInitialize() {
         modPrefs = SaveHelper.getPrefs("ColoredMapPrefs");
 
+        System.out.println("Changing accessibility of AbstractRoom fields start");
+        try {
+            abstractRoomMapSymbolField = AbstractRoom.class.getDeclaredField("mapSymbol");
+            abstractRoomMapSymbolField.setAccessible(true);
+            abstractRoomMapImgField = AbstractRoom.class.getDeclaredField("mapImg");
+            abstractRoomMapImgField.setAccessible(true);
+            abstractRoomMapImgOutlineField = AbstractRoom.class.getDeclaredField("mapImgOutline");
+            abstractRoomMapImgOutlineField.setAccessible(true);
+        } catch (Exception ex) {
+            System.out.println("Changing accessibility failed!");
+            System.out.println(ex.getMessage());
+            System.out.println(ex.toString());
+        }
+        System.out.println("Changing accessibility of AbstractRoom fields end");
+
         List<ModColorDisplay> icons = new ArrayList<>();
         icons.add(createIcon(new MonsterRoom()));
         icons.add(createIcon(new MonsterRoomElite()));
@@ -51,7 +69,7 @@ public class ColoredMap implements PostInitializeSubscriber {
         icons.add(createIcon(new TreasureRoom()));
         icons.add(createIcon(new EventRoom()));
 
-        System.out.println("Reflection Stuff Start");
+        System.out.println("Reflection to get ColoredRooms start");
         try {
             Field field = Patcher.class.getDeclaredField("annotationDBMap");
             field.setAccessible(true);
@@ -73,11 +91,11 @@ public class ColoredMap implements PostInitializeSubscriber {
                 }
             }
         } catch (Exception ex) {
-            System.out.println("Reflection Failed");
+            System.out.println("Reflection Failed!");
             System.out.println(ex.getMessage());
             System.out.println(ex.toString());
         }
-        System.out.println("Reflection Stuff End");
+        System.out.println("Reflection to get ColoredRooms End");
 
         ModPanel settingsPanel = new ModPanel();
         ModImage background = new ModImage(451.0f, 456.0f, "img/IconBackground.png");
@@ -95,17 +113,17 @@ public class ColoredMap implements PostInitializeSubscriber {
 
     private static boolean isValidColoredRoom(AbstractRoom room){
         boolean valid = true;
-        if(room.getMapSymbol() == null)
+        if(findMapSymbol(room) == null)
         {
             System.out.println(room.getClass().getName() + " has no map symbol!");
             valid = false;
         }
-        if(room.getMapImg() == null)
+        if(findMapImg(room) == null)
         {
             System.out.println(room.getClass().getName() + " has no map image!");
             valid = false;
         }
-        if(room.getMapImgOutline() == null)
+        if(findMapImgOutline(room) == null)
         {
             System.out.println(room.getClass().getName() + " has no map outline!");
             valid = false;
@@ -114,14 +132,74 @@ public class ColoredMap implements PostInitializeSubscriber {
     }
 
     private static ModColorDisplay createIcon(AbstractRoom room) {
-        String symbol = room.getMapSymbol();
-        ModColorDisplay icon = new ModColorDisplay(450.0f, 625.0f, room.getMapImg(), room.getMapImgOutline(),
-                (me) -> changeSelection(me, room.getMapSymbol()));
+        String symbol = findMapSymbol(room);
+        ModColorDisplay icon = new ModColorDisplay(450.0f, 625.0f, findMapImg(room), findMapImgOutline(room),
+            (me) -> changeSelection(me, symbol));
         icon.r = modPrefs.getFloat(symbol + "_red_icon", 1.0f);
         icon.g = modPrefs.getFloat(symbol + "_green_icon", 1.0f);
         icon.b = modPrefs.getFloat(symbol + "_blue_icon", 1.0f);
         icon.aOutline = modPrefs.getFloat(symbol + "_alpha_outline", 1.0f);
         return icon;
+    }
+
+    private static String findMapSymbol(AbstractRoom room)
+    {
+        try {
+            return room.getMapSymbol();
+        } catch (Exception ex) {
+            System.out.println("Warning: Failed to properly get map symbol of " + room.getClass().getName() + "!");
+            System.out.println(ex.getMessage());
+            System.out.println(ex.toString());
+        }
+        try {
+            return (String) abstractRoomMapSymbolField.get(room);
+        } catch (IllegalAccessException ex) {
+            System.out.println("Error: Failed to get map symbol of " + room.getClass().getName() + "!");
+            System.out.println(ex.getMessage());
+            System.out.println(ex.toString());
+        }
+        //NullPointerException will occur if initializing
+        return null;
+    }
+
+    private static Texture findMapImg(AbstractRoom room)
+    {
+        try {
+            return room.getMapImg();
+        } catch (Exception ex) {
+            System.out.println("Warning: Failed to properly get map image of " + room.getClass().getName() + "!");
+            System.out.println(ex.getMessage());
+            System.out.println(ex.toString());
+        }
+        try {
+            return (Texture) abstractRoomMapImgField.get(room);
+        } catch (IllegalAccessException ex) {
+            System.out.println("Error: Failed to get map symbol of " + room.getClass().getName() + "!");
+            System.out.println(ex.getMessage());
+            System.out.println(ex.toString());
+        }
+        //NullPointerException will occur if initializing
+        return null;
+    }
+
+    private static Texture findMapImgOutline(AbstractRoom room)
+    {
+        try {
+            return room.getMapImgOutline();
+        } catch (Exception ex) {
+            System.out.println("Warning: Failed to properly get map image outline of " + room.getClass().getName() + "!");
+            System.out.println(ex.getMessage());
+            System.out.println(ex.toString());
+        }
+        try {
+            return (Texture) abstractRoomMapImgOutlineField.get(room);
+        } catch (IllegalAccessException ex) {
+            System.out.println("Error: Failed to get map symbol of " + room.getClass().getName() + "!");
+            System.out.println(ex.getMessage());
+            System.out.println(ex.toString());
+        }
+        //NullPointerException will occur if initializing
+        return null;
     }
 
     private static void changeSelection(ModColorDisplay icon, String mapSymbol) {
@@ -178,19 +256,18 @@ public class ColoredMap implements PostInitializeSubscriber {
     }
 
     public static void setIconOutlineColor(AbstractRoom room, SpriteBatch sb) {
-        if(room.getMapSymbol() != null) {
+        String symbol = findMapSymbol(room);
+        if(symbol != null)
             sb.setColor(new Color(0.0f, 0.0f, 0.0f,
-                modPrefs.getFloat(room.getMapSymbol() + "_alpha_outline", 1.0f)));
-        }
+                modPrefs.getFloat(symbol + "_alpha_outline", 1.0f)));
     }
 
     public static void setIconColor(AbstractRoom room, SpriteBatch sb) {
-        if(room.getMapSymbol() != null) {
-            String symbol = room.getMapSymbol();
+        String symbol = findMapSymbol(room);
+        if(symbol != null)
             sb.setColor(new Color(
                 modPrefs.getFloat(symbol + "_red_icon", 1.0f),
                 modPrefs.getFloat(symbol + "_green_icon", 1.0f),
                 modPrefs.getFloat(symbol + "_blue_icon", 1.0f), 1.0f));
-        }
     }
 }
