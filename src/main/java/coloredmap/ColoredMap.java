@@ -71,10 +71,7 @@ public class ColoredMap implements PostInitializeSubscriber {
 
         System.out.println("Reflection to get ColoredRooms start");
         try {
-            Field field = Patcher.class.getDeclaredField("annotationDBMap");
-            field.setAccessible(true);
-            Map<URL, AnnotationDB> annotationDBMap = (Map<URL, AnnotationDB>)field.get(null);
-            for (AnnotationDB db : annotationDBMap.values()) {
+            for (AnnotationDB db : Patcher.annotationDBMap.values()) {
                 Set<String> roomNames = db.getAnnotationIndex().get(ColoredRoom.class.getName());
                 if (roomNames != null) {
                     for (String roomName : roomNames) {
@@ -135,10 +132,10 @@ public class ColoredMap implements PostInitializeSubscriber {
         String symbol = findMapSymbol(room);
         ModColorDisplay icon = new ModColorDisplay(450.0f, 625.0f, findMapImg(room), findMapImgOutline(room),
             (me) -> changeSelection(me, symbol));
-        icon.r = modPrefs.getFloat(symbol + "_red_icon", 1.0f);
-        icon.g = modPrefs.getFloat(symbol + "_green_icon", 1.0f);
-        icon.b = modPrefs.getFloat(symbol + "_blue_icon", 1.0f);
-        icon.aOutline = modPrefs.getFloat(symbol + "_alpha_outline", 1.0f);
+        icon.r = modPrefs.getFloat(symbol + "_red_icon", 0.0f);
+        icon.g = modPrefs.getFloat(symbol + "_green_icon", 0.0f);
+        icon.b = modPrefs.getFloat(symbol + "_blue_icon", 0.0f);
+        icon.aOutline = modPrefs.getFloat(symbol + "_alpha_outline", 0.0f);
         return icon;
     }
 
@@ -248,10 +245,10 @@ public class ColoredMap implements PostInitializeSubscriber {
         settingsPanel.addUIElement(outlineSlider);
 
         onSelectionChanged.add(() -> {
-            redSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_red_icon", 1.0f));
-            greenSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_green_icon", 1.0f));
-            blueSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_blue_icon", 1.0f));
-            outlineSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_alpha_outline", 1.0f));
+            redSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_red_icon", 0.0f));
+            greenSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_green_icon", 0.0f));
+            blueSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_blue_icon", 0.0f));
+            outlineSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_alpha_outline", 0.0f));
         });
     }
 
@@ -259,15 +256,15 @@ public class ColoredMap implements PostInitializeSubscriber {
         String symbol = findMapSymbol(room);
         if(symbol != null)
             sb.setColor(new Color(0.0f, 0.0f, 0.0f,
-                modPrefs.getFloat(symbol + "_alpha_outline", 1.0f)));
+                modPrefs.getFloat(symbol + "_alpha_outline", 0.0f)));
     }
 
     public static void setIconColor(AbstractRoom room, SpriteBatch sb) {
         String symbol = findMapSymbol(room);
         if(symbol != null)
             sb.setColor(new Color(
-                modPrefs.getFloat(symbol + "_red_icon", 1.0f),
-                modPrefs.getFloat(symbol + "_green_icon", 1.0f),
-                modPrefs.getFloat(symbol + "_blue_icon", 1.0f), 1.0f));
+                modPrefs.getFloat(symbol + "_red_icon", 0.0f),
+                modPrefs.getFloat(symbol + "_green_icon", 0.0f),
+                modPrefs.getFloat(symbol + "_blue_icon", 0.0f), 1.0f));
     }
 }
