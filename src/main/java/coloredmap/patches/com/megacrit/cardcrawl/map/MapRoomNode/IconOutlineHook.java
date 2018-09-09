@@ -8,7 +8,7 @@ import com.megacrit.cardcrawl.rooms.AbstractRoom;
 
 @SpirePatch(cls="com.megacrit.cardcrawl.map.MapRoomNode", method="render")
 public class IconOutlineHook {
-    @SpireInsertPatch(loc=394, localvars={"room"})
+    @SpireInsertPatch(loc=418, localvars={"room"})
     public static void Insert(Object meObj, Object sbObj, Object roomObj) {
         ColoredMap.setIconOutlineColor((AbstractRoom)roomObj, (SpriteBatch)sbObj);
     }

@@ -4,7 +4,7 @@
   "dependencies": ["basemod"],
   "author_list": ["timeracers", "t-larson"],
   "description": "Lets you configure the map icon colors",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "ModTheSpire": "3.0.0",
   "update_json": "https://api.github.com/repos/timeracers/ColoredMap/releases/latest"
 }
