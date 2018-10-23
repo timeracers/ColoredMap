@@ -208,7 +208,7 @@ public class ColoredMap implements PostInitializeSubscriber {
     }
 
     private static void addSliders(ModPanel settingsPanel){
-        ModSlider redSlider = new ModSlider("Red", 350.0f, 700.0f, 255.0f, "", settingsPanel, (me) -> {
+        ModSlider redSlider = new ModSlider("Red", 1125.0f, 675.0f, 255.0f, "", settingsPanel, (me) -> {
             if(hasSelection) {
                 selectedIcon.r = me.value;
                 modPrefs.putFloat(selectedMapSymbol + "_red_icon", me.value);
@@ -217,7 +217,7 @@ public class ColoredMap implements PostInitializeSubscriber {
         });
         settingsPanel.addUIElement(redSlider);
 
-        ModSlider greenSlider = new ModSlider("Green", 350.0f, 650.0f, 255.0f, "", settingsPanel, (me) -> {
+        ModSlider greenSlider = new ModSlider("Green", 1125.0f, 625.0f, 255.0f, "", settingsPanel, (me) -> {
             if(hasSelection) {
                 selectedIcon.g = me.value;
                 modPrefs.putFloat(selectedMapSymbol + "_green_icon", me.value);
@@ -226,7 +226,7 @@ public class ColoredMap implements PostInitializeSubscriber {
         });
         settingsPanel.addUIElement(greenSlider);
 
-        ModSlider blueSlider = new ModSlider("Blue", 350.0f, 600.0f, 255.0f, "", settingsPanel, (me) -> {
+        ModSlider blueSlider = new ModSlider("Blue", 1125.0f, 575.0f, 255.0f, "", settingsPanel, (me) -> {
             if(hasSelection) {
                 selectedIcon.b = me.value;
                 modPrefs.putFloat(selectedMapSymbol + "_blue_icon", me.value);
@@ -235,7 +235,7 @@ public class ColoredMap implements PostInitializeSubscriber {
         });
         settingsPanel.addUIElement(blueSlider);
 
-        ModSlider outlineSlider = new ModSlider("Outline", 350.0f, 550.0f, 100.0f, "%", settingsPanel, (me) -> {
+        ModSlider outlineSlider = new ModSlider("Outline", 1125.0f, 525.0f, 100.0f, "%", settingsPanel, (me) -> {
             if(hasSelection) {
                 selectedIcon.aOutline = me.value;
                 modPrefs.putFloat(selectedMapSymbol + "_alpha_outline", me.value);
