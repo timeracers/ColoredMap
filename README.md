@@ -6,9 +6,16 @@ Because all map icons are black with some looking similar to others, it can requ
 # Configuration
 By default the colors of the map are unaffected. You can configure them in this mod's configuration panel.
 
+Configuration Panel:
+![screenshot](https://github.com/timeracers/ColoredMap/blob/master/screenshots/ConfigurationPanel.jpg)
+
+Map:
+![screenshot](https://github.com/timeracers/ColoredMap/blob/master/screenshots/Map.jpg)
+
 # Requirements
 * Java 8, provided with Slay the Spire.
 * ModTheSpire, available here: https://github.com/kiooeht/ModTheSpire/releases
+* BaseMod, available here: https://github.com/daviscook477/BaseMod/releases
 * Slay the Spire, purchasable here: https://store.steampowered.com/app/646570/Slay_the_Spire/
 
 # Installation
