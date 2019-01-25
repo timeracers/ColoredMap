@@ -24,7 +24,7 @@ import java.util.Set;
 public class ColoredMap implements PostInitializeSubscriber {
     private static final String MODNAME = "Colored Map";
     private static final String AUTHOR = "timeracers, t-larson";
-    private static final String DESCRIPTION = "v1.3";
+    private static final String DESCRIPTION = "v2.3";
     private static Prefs modPrefs;
     private static boolean hasSelection = false;
     private static ModColorDisplay selectedIcon;
@@ -80,7 +80,7 @@ public class ColoredMap implements PostInitializeSubscriber {
                             if(isValidColoredRoom(room))
                                 icons.add(createIcon(room));
                         } catch (NoSuchMethodException innerEx) {
-                            System.out.println(roomName + " has not default constructor!");
+                            System.out.println(roomName + " has no default constructor!");
                         } catch (ClassCastException innerEx) {
                             System.out.println(roomName + " does not extend AbstractRoom!");
                         }
@@ -108,7 +108,7 @@ public class ColoredMap implements PostInitializeSubscriber {
         BaseMod.registerModBadge(badgeTexture, MODNAME, AUTHOR, DESCRIPTION, settingsPanel);
     }
 
-    private static boolean isValidColoredRoom(AbstractRoom room){
+    private static boolean isValidColoredRoom(AbstractRoom room) {
         boolean valid = true;
         if(findMapSymbol(room) == null)
         {
@@ -136,11 +136,13 @@ public class ColoredMap implements PostInitializeSubscriber {
         icon.g = modPrefs.getFloat(symbol + "_green_icon", 0.0f);
         icon.b = modPrefs.getFloat(symbol + "_blue_icon", 0.0f);
         icon.aOutline = modPrefs.getFloat(symbol + "_alpha_outline", 0.0f);
+        icon.rOutline = modPrefs.getFloat(symbol + "_red_outline", 0.0f);
+        icon.gOutline = modPrefs.getFloat(symbol + "_green_outline", 0.0f);
+        icon.bOutline = modPrefs.getFloat(symbol + "_blue_outline", 0.0f);
         return icon;
     }
 
-    private static String findMapSymbol(AbstractRoom room)
-    {
+    private static String findMapSymbol(AbstractRoom room) {
         try {
             return room.getMapSymbol();
         } catch (Exception ex) {
@@ -159,8 +161,7 @@ public class ColoredMap implements PostInitializeSubscriber {
         return null;
     }
 
-    private static Texture findMapImg(AbstractRoom room)
-    {
+    private static Texture findMapImg(AbstractRoom room) {
         try {
             return room.getMapImg();
         } catch (Exception ex) {
@@ -179,8 +180,7 @@ public class ColoredMap implements PostInitializeSubscriber {
         return null;
     }
 
-    private static Texture findMapImgOutline(AbstractRoom room)
-    {
+    private static Texture findMapImgOutline(AbstractRoom room) {
         try {
             return room.getMapImgOutline();
         } catch (Exception ex) {
@@ -207,7 +207,7 @@ public class ColoredMap implements PostInitializeSubscriber {
             action.run();
     }
 
-    private static void addSliders(ModPanel settingsPanel){
+    private static void addSliders(ModPanel settingsPanel) {
         ModSlider redSlider = new ModSlider("Red", 1125.0f, 675.0f, 255.0f, "", settingsPanel, (me) -> {
             if(hasSelection) {
                 selectedIcon.r = me.value;
@@ -235,27 +235,60 @@ public class ColoredMap implements PostInitializeSubscriber {
         });
         settingsPanel.addUIElement(blueSlider);
 
-        ModSlider outlineSlider = new ModSlider("Outline", 1125.0f, 525.0f, 100.0f, "%", settingsPanel, (me) -> {
+        ModSlider outlineAlphaSlider = new ModSlider("Outline Alpha", 1125.0f, 525.0f, 100.0f, "%", settingsPanel, (me) -> {
             if(hasSelection) {
                 selectedIcon.aOutline = me.value;
                 modPrefs.putFloat(selectedMapSymbol + "_alpha_outline", me.value);
                 modPrefs.flush();
             }
         });
-        settingsPanel.addUIElement(outlineSlider);
+        settingsPanel.addUIElement(outlineAlphaSlider);
+
+        ModSlider outlineRedSlider = new ModSlider("Outline Red", 1125.0f, 475.0f, 255.0f, "", settingsPanel, (me) -> {
+            if(hasSelection) {
+                selectedIcon.rOutline = me.value;
+                modPrefs.putFloat(selectedMapSymbol + "_red_outline", me.value);
+                modPrefs.flush();
+            }
+        });
+        settingsPanel.addUIElement(outlineRedSlider);
+
+        ModSlider outlineGreenSlider = new ModSlider("Outline Green", 1125.0f, 425.0f, 255.0f, "", settingsPanel, (me) -> {
+            if(hasSelection) {
+                selectedIcon.gOutline = me.value;
+                modPrefs.putFloat(selectedMapSymbol + "_green_outline", me.value);
+                modPrefs.flush();
+            }
+        });
+        settingsPanel.addUIElement(outlineGreenSlider);
+
+        ModSlider outlineBlueSlider = new ModSlider("Outline Blue", 1125.0f, 375.0f, 255.0f, "", settingsPanel, (me) -> {
+            if(hasSelection) {
+                selectedIcon.bOutline = me.value;
+                modPrefs.putFloat(selectedMapSymbol + "_blue_outline", me.value);
+                modPrefs.flush();
+            }
+        });
+        settingsPanel.addUIElement(outlineBlueSlider);
 
         onSelectionChanged.add(() -> {
             redSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_red_icon", 0.0f));
             greenSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_green_icon", 0.0f));
             blueSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_blue_icon", 0.0f));
-            outlineSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_alpha_outline", 0.0f));
+            outlineAlphaSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_alpha_outline", 0.0f));
+            outlineRedSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_red_outline", 0.0f));
+            outlineGreenSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_green_outline", 0.0f));
+            outlineBlueSlider.setValue(modPrefs.getFloat(selectedMapSymbol + "_blue_outline", 0.0f));
         });
     }
 
     public static void setIconOutlineColor(AbstractRoom room, SpriteBatch sb) {
         String symbol = findMapSymbol(room);
         if(symbol != null)
-            sb.setColor(new Color(0.0f, 0.0f, 0.0f,
+            sb.setColor(new Color(
+                modPrefs.getFloat(symbol + "_red_outline", 0.0f),
+                modPrefs.getFloat(symbol + "_green_outline", 0.0f),
+                modPrefs.getFloat(symbol + "_blue_outline", 0.0f),
                 modPrefs.getFloat(symbol + "_alpha_outline", 0.0f)));
     }
 

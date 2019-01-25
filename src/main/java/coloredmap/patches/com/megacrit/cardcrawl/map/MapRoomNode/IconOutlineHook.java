@@ -19,9 +19,9 @@ public class IconOutlineHook {
 
     private static class Locator extends SpireInsertLocator {
         public int[] Locate(CtBehavior ctMethodToPatch) throws CannotCompileException, PatchingException {
-            Matcher finalMatcher = new Matcher.MethodCallMatcher(
+            Matcher matcher = new Matcher.MethodCallMatcher(
                 "com.badlogic.gdx.graphics.g2d.SpriteBatch", "draw");
-            return new int[] { LineFinder.findAllInOrder(ctMethodToPatch, new ArrayList<>(), finalMatcher)[0] };
+            return new int[] { LineFinder.findAllInOrder(ctMethodToPatch, new ArrayList<>(), matcher)[0] };
         }
     }
 }
