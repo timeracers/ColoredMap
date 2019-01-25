@@ -35,6 +35,9 @@ class Pagination implements IUIElement
             newElement.b = element.b;
             newElement.a = element.a;
             newElement.aOutline = element.aOutline;
+            newElement.rOutline = element.rOutline;
+            newElement.gOutline = element.gOutline;
+            newElement.bOutline = element.bOutline;
             this.elements.add(newElement);
         }
     }
