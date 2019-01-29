@@ -3,18 +3,24 @@ package coloredmap;
 import basemod.*;
 import basemod.interfaces.PostInitializeSubscriber;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.evacipated.cardcrawl.modthespire.Patcher;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
-import com.megacrit.cardcrawl.helpers.Prefs;
-import com.megacrit.cardcrawl.helpers.SaveHelper;
+import com.megacrit.cardcrawl.core.Settings;
+import com.megacrit.cardcrawl.helpers.*;
 import com.megacrit.cardcrawl.rooms.*;
 import org.scannotation.AnnotationDB;
 
+import java.io.*;
+import java.io.File;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +30,7 @@ import java.util.Set;
 public class ColoredMap implements PostInitializeSubscriber {
     private static final String MODNAME = "Colored Map";
     private static final String AUTHOR = "timeracers, t-larson";
-    private static final String DESCRIPTION = "v2.3";
+    private static final String DESCRIPTION = "v2.4";
     private static Prefs modPrefs;
     private static boolean hasSelection = false;
     private static ModColorDisplay selectedIcon;
@@ -44,6 +50,19 @@ public class ColoredMap implements PostInitializeSubscriber {
 
     @Override
     public void receivePostInitialize() {
+        String prefsLoc = (Settings.isBeta ? "betaPreferences" : "Preferences") + File.separator + "ColoredMapPrefs";
+        if(!Gdx.files.local(prefsLoc).exists())
+            try {
+                System.out.println("Copying default preferences");
+                byte[] data = Gdx.files.classpath("DefaultColoredMapPrefs.json").readBytes();
+                Path path = FileSystems.getDefault().getPath(Gdx.files.getLocalStoragePath() + prefsLoc, new String[0]);
+                Files.write(path, data, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.SYNC);
+            } catch (Exception ex) {
+                System.out.println("Error: Failed to copy default preferences!");
+                System.out.println(ex.getMessage());
+                System.out.println(ex.toString());
+            }
+
         modPrefs = SaveHelper.getPrefs("ColoredMapPrefs");
 
         System.out.println("Changing accessibility of AbstractRoom fields start");
